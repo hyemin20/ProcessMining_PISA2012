@@ -43,25 +43,35 @@ library(rsconnect); library(bupaR); library(edeaR); library(processmapR); librar
 ###' 
 
 ### Set file path
-original <- read.csv("D:/HYEM'S/GraduatedSchool/PROJECTS/MyProjects/ProcessMining_PISA2012/datasets/1_GenerateVariables_time_2_mean.csv", header = TRUE, stringsAsFactors = FALSE) %>% tibble()
-sequence <- read.csv("D:/HYEM'S/GraduatedSchool/PROJECTS/MyProjects/ProcessMining_PISA2012/datasets/ab_sequence_final.csv", header = TRUE, stringsAsFactors = FALSE) %>% tibble()
+log_data <- read.csv("D:/HYEM'S/GraduatedSchool/PROJECTS/MyProjects/ProcessMining_PISA2012/datasets/0_StartWith_4_final.csv", header = TRUE, stringsAsFactors = FALSE) %>% tibble()
+original <- read.csv("D:/HYEM'S/GraduatedSchool/PROJECTS/MyProjects/ProcessMining_PISA2012/datasets/1_GenerateVariables_1_time_mean.csv", header = TRUE, stringsAsFactors = FALSE) %>% tibble()
+sequence <- read.csv("D:/HYEM'S/GraduatedSchool/PROJECTS/MyProjects/ProcessMining_PISA2012/datasets/1_GenerateVariables_2_sequence_abs_and_length.csv", header = TRUE, stringsAsFactors = FALSE) %>% tibble()
 
 
 
 ###' ###########################################################################'
 ###' 
-###' data with score
+###' data merge
 ###' 
 ###'
 
+head(log_data)
 head(original)
 head(sequence)
-names(sequence) <- c("ID", "credit", "sequence", "length")
-sequence <- sequence[, -2]
-all <- left_join(original, sequence, by = 'ID')
+names(sequence) <- c("ID", "sequence", "length")
+names(original)
 
-all$length <- ifelse(is.na(all$length), 0, all$length)
-all <- all %>% 
-  filter(time_not_answer >= 0)
+log_data_1 <- log_data %>%
+  filter(number == 1) %>%
+  select(ID, credit, OECD)
 
-write.csv(all,file="1_GenerateVariables_3_merge.csv")
+nrow(sequence)
+nrow(original)
+nrow(log_data_1)
+
+all_1  <- left_join(original, sequence, by = 'ID')
+all_2  <- left_join(all_1, log_data_1, by = 'ID')
+all_2$length <- ifelse(is.na(all_1$length), 0, all_2$length)
+
+
+write.csv(all_2,file="1_GenerateVariables_3_merge.csv")
