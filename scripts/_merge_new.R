@@ -44,7 +44,7 @@ library(rsconnect); library(bupaR); library(edeaR); library(processmapR); librar
 
 ### Set file path
 log_data <- read.csv("D:/HYEM'S/GraduatedSchool/PROJECTS/MyProjects/ProcessMining_PISA2012/datasets/0_StartWith_4_final.csv", header = TRUE, stringsAsFactors = FALSE) %>% tibble()
-original <- read.csv("D:/HYEM'S/GraduatedSchool/PROJECTS/MyProjects/ProcessMining_PISA2012/datasets/1_GenerateVariables_1_time_mean.csv", header = TRUE, stringsAsFactors = FALSE) %>% tibble()
+original <- read.csv("D:/HYEM'S/GraduatedSchool/PROJECTS/MyProjects/ProcessMining_PISA2012/datasets/1_GenerateVariables_1_time_num.csv", header = TRUE, stringsAsFactors = FALSE) %>% tibble()
 sequence <- read.csv("D:/HYEM'S/GraduatedSchool/PROJECTS/MyProjects/ProcessMining_PISA2012/datasets/1_GenerateVariables_2_sequence_abs_and_length.csv", header = TRUE, stringsAsFactors = FALSE) %>% tibble()
 
 
@@ -60,25 +60,33 @@ head(original)
 head(sequence)
 names(sequence) <- c("ID", "sequence", "length")
 
-  
+
 ### merge
 log_data_1 <- log_data %>%
-  filter(number == 1) %>%
-  select(ID, credit, OECD)
+  filter(credit == 1) %>%
+  select(ID, credit, OECD) %>%
+  unique()
 
 nrow(sequence)
 nrow(original)
 nrow(log_data_1)
 
+nrow(distinct(all_2, ID))
+
 all_1  <- left_join(original, sequence, by = 'ID')
-all_2  <- left_join(all_1, log_data_1, by = 'ID')
-all_2$length <- ifelse(is.na(all_1$length), 0, all_2$length)
+all_2  <- inner_join(log_data_1, all_1, by = 'ID')
+all_2$length <- ifelse(is.na(all_2$length), 0, all_2$length)
+
+
+nrow(all_2)
 
 
 ### check all_2
 names(all_2)
 summary(all_2)
-df_nomiss <- all_2 %>% filter(is.na(avg_time_btw_events))
-all_2 <- all_2[!(all_2$ID == "ARE000006801770" ), ]
+
+# df_nomiss <- all_2 %>% filter(is.na(avg_time_btw_events))
+# all_2 <- all_2[!(all_2$ID == "ARE000006801770" ), ]
+# df_nomiss <- na.omit(all_2)
 
 write.csv(all_2,file="1_GenerateVariables_3_merge.csv")
